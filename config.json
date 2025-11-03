@@ -10,9 +10,7 @@
     "enabled": false,
     "hostname": "pico-clock-green",
     "ssid": "",
-    "passphrase": "",
-    "ntpEnabled": true,
-    "ntpPTZ": "GMT0"
+    "passphrase": ""
   },
   "mqttConfig": {
     "enabled": false,
@@ -20,5 +18,10 @@
     "prefix": "",
     "username": "",
     "password": ""
+  },
+  "ntp": {
+    "enabled": true,
+    "server": "192.168.1.2",
+    "interval": 21600
   }
 }
