@@ -15,9 +15,9 @@ class Display:
             self.callback = partial(callback, *args, **kwargs)
 
     def __init__(self, scheduler):
-        self.a0 = Pin(16, Pin.OUT)
-        self.a1 = Pin(18, Pin.OUT)
-        self.a2 = Pin(22, Pin.OUT)
+        self.a0 = Pin(4, Pin.OUT)  # A0 → GP4
+        self.a1 = Pin(5, Pin.OUT)  # A1 → GP5
+        self.a2 = Pin(8, Pin.OUT)  # A2 → GP8
         self.oe = Pin(13, Pin.OUT)
         self.sdi = Pin(11, Pin.OUT)
         self.clk = Pin(10, Pin.OUT)
@@ -62,8 +62,7 @@ class Display:
 
     async def animate_text(self, text: str, delay=1000, clear=True, force=False):
         if self.animating and not force:
-            self.display_queue.append(
-                self.WaitForAnimation(self.animate_text, text, delay, clear=clear))
+            self.display_queue.append(self.WaitForAnimation(self.animate_text, text, delay, clear=clear))
             return
 
         # add blank whitespace for text to show correctly
@@ -76,15 +75,14 @@ class Display:
     def animate(self, delay=1000):
         self.runs = 0
         self.animating = True
-        self.scheduler.schedule(
-            SCHEDULER_ANIMATION, 200, self.scroll_text_left, delay)
+        self.scheduler.schedule(SCHEDULER_ANIMATION, 200, self.scroll_text_left, delay)
 
     async def scroll_text_left(self):
         for row in range(8):
             led_row = self.leds[row]
             for col in range(self.display_text_width):
                 if row > 0 and col > 2:
-                    self.leds[row][col-1] = led_row[col]
+                    self.leds[row][col - 1] = led_row[col]
         self.runs += 1
 
         if self.runs == self.display_text_width - 3:  # account for whitespace
@@ -125,8 +123,7 @@ class Display:
 
     async def show_text_for_period(self, text, pos=0, clear=True, display_period=5000):
         if self.animating:
-            self.display_queue.append(
-                self.WaitForAnimation(self.show_text_for_period, text, pos, display_period))
+            self.display_queue.append(self.WaitForAnimation(self.show_text_for_period, text, pos, display_period))
             return
 
         await self.show_text(text, pos, clear)
@@ -135,8 +132,7 @@ class Display:
 
     async def show_text(self, text, pos=0, clear=True):
         if self.animating:
-            self.display_queue.append(
-                self.WaitForAnimation(self.show_text, text, pos, clear))
+            self.display_queue.append(self.WaitForAnimation(self.show_text, text, pos, clear))
             return
 
         if clear:
@@ -144,8 +140,8 @@ class Display:
 
         i = 0
         while i < len(text):
-            if text[i:i + 2] in self.ziku:
-                c = text[i:i + 2]
+            if text[i : i + 2] in self.ziku:
+                c = text[i : i + 2]
                 i += 2
             else:
                 c = text[i]
@@ -162,8 +158,8 @@ class Display:
 
         i = 0
         while i < len(text):
-            if text[i:i + 2] in self.ziku:
-                c = text[i:i + 2]
+            if text[i : i + 2] in self.ziku:
+                c = text[i : i + 2]
                 i += 2
             else:
                 c = text[i]
@@ -187,8 +183,7 @@ class Display:
             temp = helpers.convert_celsius_to_temperature(temp)
             symbol = "°F"
         temp = str(temp)
-        await self.animate_text(self.time + " " + temp +
-                                symbol, delay=0, clear=False)
+        await self.animate_text(self.time + " " + temp + symbol, delay=0, clear=False)
 
     async def show_message(self, text: str):
         self.showing_time = False
@@ -246,15 +241,13 @@ class Display:
             self.auto_backlight = False
             self.hide_icon("AutoLight")
             self.current_backlight = 0
-            self.scheduler.remove(
-                SCHEDULER_UPDATE_BACKLIGHT_VALUE)
+            self.scheduler.remove(SCHEDULER_UPDATE_BACKLIGHT_VALUE)
             self.config.update_autolight_value(False)
-        elif self.current_backlight == len(self.backlight_sleep)-1:
+        elif self.current_backlight == len(self.backlight_sleep) - 1:
             self.show_icon("AutoLight")
             self.auto_backlight = True
             self.update_auto_backlight_value()
-            self.scheduler.schedule(
-                SCHEDULER_UPDATE_BACKLIGHT_VALUE, 1000, self.update_backlight_callback)
+            self.scheduler.schedule(SCHEDULER_UPDATE_BACKLIGHT_VALUE, 1000, self.update_backlight_callback)
             self.config.update_autolight_value(True)
         else:
             self.current_backlight += 1
@@ -270,8 +263,7 @@ class Display:
 
         if self.auto_backlight:
             self.show_icon("AutoLight")
-            self.scheduler.schedule(
-                SCHEDULER_UPDATE_BACKLIGHT_VALUE, 1000, self.update_backlight_callback)
+            self.scheduler.schedule(SCHEDULER_UPDATE_BACKLIGHT_VALUE, 1000, self.update_backlight_callback)
 
     def update_auto_backlight_value(self):
         backlight = 0
@@ -310,9 +302,9 @@ class Display:
             print("")
 
     def square(self):
-        '''
+        """
         Prints a crossed square. For debugging purposes.
-        '''
+        """
         for row in range(1, 8):
             self.leds[row][2] = 1
             self.leds[row][23] = 1
@@ -356,15 +348,7 @@ class Display:
         }
 
     def initialise_days(self):
-        self.days_of_week = {
-            0: "Mon",
-            1: "Tue",
-            2: "Wed",
-            3: "Thur",
-            4: "Fri",
-            5: "Sat",
-            6: "Sun"
-        }
+        self.days_of_week = {0: "Mon", 1: "Tue", 2: "Wed", 3: "Thur", 4: "Fri", 5: "Sat", 6: "Sun"}
 
     def show_day(self, int):
         for key in self.days_of_week:
@@ -388,7 +372,6 @@ class Display:
             "7": self.Character(width=4, rows=[0x0F, 0x09, 0x04, 0x04, 0x04, 0x04, 0x04]),
             "8": self.Character(width=4, rows=[0x06, 0x09, 0x09, 0x06, 0x09, 0x09, 0x06]),
             "9": self.Character(width=4, rows=[0x06, 0x09, 0x09, 0x0E, 0x08, 0x04, 0x02]),
-
             "A": self.Character(width=4, rows=[0x06, 0x09, 0x09, 0x0F, 0x09, 0x09, 0x09]),
             "B": self.Character(width=4, rows=[0x07, 0x09, 0x09, 0x07, 0x09, 0x09, 0x07]),
             "C": self.Character(width=4, rows=[0x06, 0x09, 0x01, 0x01, 0x01, 0x09, 0x06]),
@@ -415,11 +398,9 @@ class Display:
             "X": self.Character(width=5, rows=[0x11, 0x0A, 0x04, 0x04, 0x04, 0x0A, 0x11]),
             "Y": self.Character(width=4, rows=[0x1F, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04]),
             "Z": self.Character(width=4, rows=[0x0F, 0x08, 0x04, 0x02, 0x01, 0x0F, 0x00]),
-
             ":": self.Character(width=2, rows=[0x00, 0x03, 0x03, 0x00, 0x03, 0x03, 0x00]),
             # colon width space
             " :": self.Character(width=2, rows=[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
-
             # temp symbol
             "°": self.Character(width=2, rows=[0x03, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00]),
             # space
