@@ -1,9 +1,9 @@
 {
   "runConfig": {
-    "blinkTimeColon": true,
+    "blinkTimeColon": false,
     "temp": "c",
     "clockType": "24",
-    "showTemp": true,
+    "showTemp": false,
     "autolight": true
   },
   "wifiConfig": {
@@ -19,9 +19,9 @@
     "username": "",
     "password": ""
   },
-  "ntp": {
+  "ntpConfig": {
     "enabled": true,
-    "server": "192.168.1.2",
-    "interval": 21600
+    "server": "192.168.1.240",
+    "interval": 86400
   }
 }

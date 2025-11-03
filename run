@@ -8,8 +8,7 @@ from datetime import datetime
 from pathlib import Path
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--device', action='store_true',
-                    default="/dev/cu.usbmodem14101")
+parser.add_argument("--device", action="store_true", default="/dev/tty.usbmodem202201")
 args = parser.parse_args()
 
 CURRENT_DIR = Path(__file__).parent
@@ -29,8 +28,7 @@ for file in os.listdir(CURRENT_DIR):
 
         if datetime.utcfromtimestamp(os.path.getmtime(CURRENT_DIR.joinpath(file))) > LASTRUN:
             print(f"copy: {file}")
-            subprocess.run(
-                ["ampy", "--port", args.device, "put", file, f"/{file}"])
+            subprocess.run(["ampy", "--port", args.device, "put", file, f"/{file}"])
         else:
             print(f"up to date: {file}")
 
