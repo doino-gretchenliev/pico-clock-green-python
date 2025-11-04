@@ -29,11 +29,9 @@ class Clock(App):
     async def enable(self):
         self.enabled = True
         self.buttons.add_callback(2, self.temp_callback, max=500)
-        self.buttons.add_callback(
-            2, self.switch_temperature_callback, min=500, max=5000)
+        self.buttons.add_callback(2, self.switch_temperature_callback, min=500, max=5000)
         self.buttons.add_callback(3, self.backlight_callback, max=500)
-        self.buttons.add_callback(
-            3, self.switch_blink_callback, min=500, max=5000)
+        self.buttons.add_callback(3, self.switch_blink_callback, min=500, max=5000)
         await self.update_time()
         await self.show_time()
         self.display.show_temperature_icon()
@@ -63,7 +61,7 @@ class Clock(App):
                 print("NTP time sync failed")
                 return False
 
-            local_time= localPTZtime.tztime(time.time(), self.wifi_config.ntp_ptz)
+            local_time = localPTZtime.tztime(time.time(), self.wifi_config.ntp_ptz)
             self.rtc.save_time(local_time[:8])
             return True
         return False
@@ -77,10 +75,10 @@ class Clock(App):
 
             if self.minute % 5 == 0 and self.second == 0:
                 if not self.wlan.wifi_connected():
-                    self.wlan.connect_to_wifi() # Reconnect to WiFi every 5 minutes if not connected
+                    self.wlan.connect_to_wifi()  # Reconnect to WiFi every 5 minutes if not connected
 
             if self.minute == 10 and self.second == 0:
-                if self.ntp_sync(): # Sync time via NTP every hour at HH:10:00
+                if self.ntp_sync():  # Sync time via NTP every hour at HH:10:00
                     print("NTP time sync successful")
 
             self.show_time_icon()

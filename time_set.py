@@ -46,10 +46,8 @@ class TimeSet(App):
         self.state_index = -1
         self.flash_count = 0
         self.flash_state = False
-        scheduler.schedule(SCHEDULER_TIME_SET_HALF_SECOND, 500,
-                           self.half_secs_callback)
-        scheduler.schedule(SCHEDULER_TIME_SET_MINUTE,
-                           60000, self.mins_callback)
+        scheduler.schedule(SCHEDULER_TIME_SET_HALF_SECOND, 500, self.half_secs_callback)
+        scheduler.schedule(SCHEDULER_TIME_SET_MINUTE, 60000, self.mins_callback)
         self.initialise_states()
 
     def initialise_states(self):
@@ -79,7 +77,7 @@ class TimeSet(App):
 
     async def half_secs_callback(self):
         if self.enabled:
-            self.flash_count = (self.flash_count+1) % 3
+            self.flash_count = (self.flash_count + 1) % 3
             if self.flash_count == 2:
                 if self.state.length == 2:
                     await self.display.show_text("  ", pos=self.state.position)
@@ -90,11 +88,9 @@ class TimeSet(App):
                 if not self.flash_state:
                     self.flash_state = True
                     if self.state.length == 2:
-                        await self.display.show_text(
-                            "%02d" % self.time[self.state.index], pos=self.state.position)
+                        await self.display.show_text("%02d" % self.time[self.state.index], pos=self.state.position)
                     elif self.state.length == 4:
-                        await self.display.show_text(
-                            "%04d" % self.time[self.state.index], pos=self.state.position)
+                        await self.display.show_text("%04d" % self.time[self.state.index], pos=self.state.position)
 
     async def mins_callback(self):
         if self.enabled:
@@ -116,10 +112,10 @@ class TimeSet(App):
             now = "%02d/%02d" % (t[1], t[2])
             await self.display.show_text(now)
         elif self.state.panel == "dow":
-            print ("Entering Day-of-week panel!")
+            print("Entering Day-of-week panel!")
             t = self.rtc.get_time()
             now = self.display.days_of_week[t[6]].upper()
-            print ("Day of week: %s" % now)
+            print("Day of week: %s" % now)
             # "" % (self.display.days_of_week[ t[6] ])
             await self.display.show_text(now)
             self.display.show_day(t[6])
@@ -132,8 +128,7 @@ class TimeSet(App):
             month = t[1]
             max = month_max[month]
 
-        t[self.state.index] = (t[self.state.index]+1 -
-                               self.state.offset) % max + self.state.offset
+        t[self.state.index] = (t[self.state.index] + 1 - self.state.offset) % max + self.state.offset
         self.rtc.save_time(tuple(t))
         self.flash_count = 0
         await self.update_display()
@@ -146,8 +141,7 @@ class TimeSet(App):
             month = t[1]
             max = month_max[month]
 
-        t[self.state.index] = (t[self.state.index]-1 -
-                               self.state.offset) % max + self.state.offset
+        t[self.state.index] = (t[self.state.index] - 1 - self.state.offset) % max + self.state.offset
         self.rtc.save_time(tuple(t))
         self.flash_count = 0
         await self.update_display()

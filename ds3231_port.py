@@ -9,17 +9,18 @@
 import utime
 import machine
 import sys
+
 DS3231_I2C_ADDR = 104
 
 try:
     rtc = machine.RTC()
 except:
-    print('Warning: machine module does not support the RTC.')
+    print("Warning: machine module does not support the RTC.")
     rtc = None
 
 
 def bcd2dec(bcd):
-    return (((bcd & 0xf0) >> 4) * 10 + (bcd & 0x0f))
+    return ((bcd & 0xF0) >> 4) * 10 + (bcd & 0x0F)
 
 
 def dec2bcd(dec):
@@ -28,7 +29,7 @@ def dec2bcd(dec):
 
 
 def tobytes(num):
-    return num.to_bytes(1, 'little')
+    return num.to_bytes(1, "little")
 
 
 class DS3231:
@@ -36,15 +37,13 @@ class DS3231:
         self.ds3231 = i2c
         self.timebuf = bytearray(7)
         if DS3231_I2C_ADDR not in self.ds3231.scan():
-            raise RuntimeError(
-                "DS3231 not found on I2C bus at %d" % DS3231_I2C_ADDR)
+            raise RuntimeError("DS3231 not found on I2C bus at %d" % DS3231_I2C_ADDR)
 
     def get_time(self, set_rtc=False):
         if set_rtc:
             self.await_transition()  # For accuracy set RTC immediately after a seconds transition
         else:
-            self.ds3231.readfrom_mem_into(
-                DS3231_I2C_ADDR, 0, self.timebuf)  # don't wait
+            self.ds3231.readfrom_mem_into(DS3231_I2C_ADDR, 0, self.timebuf)  # don't wait
         return self.convert(set_rtc)
 
     def convert(self, set_rtc=False):  # Return a tuple in localtime() format (less yday)
@@ -52,14 +51,14 @@ class DS3231:
         ss = bcd2dec(data[0])
         mm = bcd2dec(data[1])
         if data[2] & 0x40:
-            hh = bcd2dec(data[2] & 0x1f)
+            hh = bcd2dec(data[2] & 0x1F)
             if data[2] & 0x20:
                 hh += 12
         else:
             hh = bcd2dec(data[2])
         wday = data[3]
         DD = bcd2dec(data[4])
-        MM = bcd2dec(data[5] & 0x1f)
+        MM = bcd2dec(data[5] & 0x1F)
         YY = bcd2dec(data[6])
         if data[5] & 0x80:
             YY += 2000
@@ -80,21 +79,15 @@ class DS3231:
         (YY, MM, mday, hh, mm, ss, wday, yday) = t
         self.ds3231.writeto_mem(DS3231_I2C_ADDR, 0, tobytes(dec2bcd(ss)))
         self.ds3231.writeto_mem(DS3231_I2C_ADDR, 1, tobytes(dec2bcd(mm)))
-        self.ds3231.writeto_mem(DS3231_I2C_ADDR, 2, tobytes(
-            dec2bcd(hh)))  # Sets to 24hr mode
-        self.ds3231.writeto_mem(DS3231_I2C_ADDR, 3, tobytes(
-            dec2bcd(wday)))  # 0 == Monday, 6 == Sunday
-        self.ds3231.writeto_mem(DS3231_I2C_ADDR, 4, tobytes(
-            dec2bcd(mday)))  # Day of month
+        self.ds3231.writeto_mem(DS3231_I2C_ADDR, 2, tobytes(dec2bcd(hh)))  # Sets to 24hr mode
+        self.ds3231.writeto_mem(DS3231_I2C_ADDR, 3, tobytes(dec2bcd(wday)))  # 0 == Monday, 6 == Sunday
+        self.ds3231.writeto_mem(DS3231_I2C_ADDR, 4, tobytes(dec2bcd(mday)))  # Day of month
         if YY >= 2000:
-            self.ds3231.writeto_mem(DS3231_I2C_ADDR, 5, tobytes(
-                dec2bcd(MM) | 0b10000000))  # Century bit
-            self.ds3231.writeto_mem(
-                DS3231_I2C_ADDR, 6, tobytes(dec2bcd(YY-2000)))
+            self.ds3231.writeto_mem(DS3231_I2C_ADDR, 5, tobytes(dec2bcd(MM) | 0b10000000))  # Century bit
+            self.ds3231.writeto_mem(DS3231_I2C_ADDR, 6, tobytes(dec2bcd(YY - 2000)))
         else:
             self.ds3231.writeto_mem(DS3231_I2C_ADDR, 5, tobytes(dec2bcd(MM)))
-            self.ds3231.writeto_mem(
-                DS3231_I2C_ADDR, 6, tobytes(dec2bcd(YY-1900)))
+            self.ds3231.writeto_mem(DS3231_I2C_ADDR, 6, tobytes(dec2bcd(YY - 1900)))
 
     # Wait until DS3231 seconds value changes before reading and returning data
     def await_transition(self):
@@ -112,8 +105,8 @@ class DS3231:
     # runtimes improve this, but the DS3231 is "only" good for +-2ppm over 0-40C.
     def rtc_test(self, runtime=600, ppm=False, verbose=True):
         if rtc is None:
-            raise RuntimeError('machine.RTC does not exist')
-        verbose and print('Waiting {} minutes for result'.format(runtime//60))
+            raise RuntimeError("machine.RTC does not exist")
+        verbose and print("Waiting {} minutes for result".format(runtime // 60))
         factor = 1_000_000 if ppm else 114_155_200  # seconds per year
 
         self.await_transition()  # Start on transition of DS3231. Record time in .timebuf
@@ -125,8 +118,7 @@ class DS3231:
         # Time when transition occurred
         ds3231_start = utime.mktime(self.convert())
         t = rtc.datetime()
-        rtc_start = utime.mktime(
-            (t[0], t[1], t[2], t[4], t[5], t[6], t[3], 0))  # y m d h m s wday 0
+        rtc_start = utime.mktime((t[0], t[1], t[2], t[4], t[5], t[6], t[3], 0))  # y m d h m s wday 0
 
         utime.sleep(runtime)  # Wait a while (precision doesn't matter)
 
@@ -146,8 +138,7 @@ class DS3231:
         d_ds3231 = 1000 * (ds3231_end - ds3231_start)  # ms recorded by DS3231
         ratio = (d_ds3231 - d_rtc) / d_ds3231
         ppm = ratio * 1_000_000
-        verbose and print(
-            'DS3231 leads RTC by {:4.1f}ppm {:4.1f}mins/yr'.format(ppm, ppm*1.903))
+        verbose and print("DS3231 leads RTC by {:4.1f}ppm {:4.1f}mins/yr".format(ppm, ppm * 1.903))
         return ratio * factor
 
     def _twos_complement(self, input_value: int, num_bits: int) -> int:

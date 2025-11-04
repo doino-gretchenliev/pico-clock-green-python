@@ -12,12 +12,11 @@ class PicoTemperature:
         self.sensor = machine.ADC(4)
         self.conversion_factor = 3.3 / (65535)
         self.temperature = 0
-        mqtt.register_state_callback(
-            "device_temperature", self.mqtt_state_callback)
+        mqtt.register_state_callback("device_temperature", self.mqtt_state_callback)
 
     def get_temperature(self):
         reading = self.sensor.read_u16() * self.conversion_factor
-        self.temperature = 27 - (reading - 0.706)/0.001721
+        self.temperature = 27 - (reading - 0.706) / 0.001721
         return self.temperature
 
     def mqtt_state_callback(self):

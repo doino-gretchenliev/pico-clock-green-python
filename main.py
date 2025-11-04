@@ -17,11 +17,7 @@ import _thread
 
 machine.freq(250_000_000)  # type: ignore
 
-APP_CLASSES = [
-    Clock,
-    Pomodoro,
-    TimeSet
-]
+APP_CLASSES = [Clock, Pomodoro, TimeSet]
 
 print("-" * 10)
 print("PICO CLOCK")
@@ -54,6 +50,7 @@ async def start():
 
     # start apps
     await apps.start()
+
 
 uasyncio.run(start())
 loop = uasyncio.get_event_loop()

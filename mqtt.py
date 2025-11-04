@@ -36,15 +36,13 @@ class MQTT:
             else:
                 password = None
 
-            self.client = MQTTClient(self.configuration.prefix, self.configuration.broker, user=user,
-                                     password=password, keepalive=300, ssl=False, ssl_params={})
+            self.client = MQTTClient(
+                self.configuration.prefix, self.configuration.broker, user=user, password=password, keepalive=300, ssl=False, ssl_params={}
+            )
             self.connect()
-            scheduler.schedule(SCHEDULER_MQTT_HEARTBEAT, 250,
-                               self.scheduler_heartbeat_callback)
-            scheduler.schedule(SCHEDULER_MQTT_CHECK, 1,
-                               self.scheduler_mqtt_callback)
-            scheduler.schedule(SCHEDULER_MQTT_STATE, 60000,
-                               self.scheduler_mqtt_state)
+            scheduler.schedule(SCHEDULER_MQTT_HEARTBEAT, 250, self.scheduler_heartbeat_callback)
+            scheduler.schedule(SCHEDULER_MQTT_CHECK, 1, self.scheduler_mqtt_callback)
+            scheduler.schedule(SCHEDULER_MQTT_STATE, 60000, self.scheduler_mqtt_state)
 
     def connect(self):
         print("Connecting to MQTT")

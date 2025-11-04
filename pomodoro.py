@@ -72,7 +72,7 @@ class Pomodoro(App):
             self.time_left = self.pomodoro_duration
 
     def _time_left(self):
-        return self.time_left - (time.ticks_diff(time.ticks_ms(), self.start_time)/1000)
+        return self.time_left - (time.ticks_diff(time.ticks_ms(), self.start_time) / 1000)
 
     def stop(self):
         self.started = False
